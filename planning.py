@@ -403,3 +403,52 @@ def dijkstra(graph, start_id, end_id):
     return (path, total_cost)
 
 dijkstra(prm_graph,0,99)
+
+## ====================== CHATGPT DIJKSTRAS ===================================
+import heapq
+
+def dijkstra(graph, start_id, end_id):
+    path = []
+    node_list = graph.nodes
+    edge_list = graph.edges
+
+    # shortest_path[node] = (previous_node, cost)
+    shortest_path = {start_id: (None, 0)}
+    priority_queue = [(0, start_id)]
+    visited = set()
+
+    while priority_queue:
+        current_weight, current_node = heapq.heappop(priority_queue)
+
+        if current_node in visited:
+            continue
+
+        visited.add(current_node)
+
+        if current_node == end_id:
+            break
+
+        for next_node, weight in edge_list[current_node].items():
+            if next_node in visited:
+                continue
+
+            new_weight = current_weight + weight
+
+            if next_node not in shortest_path or new_weight < shortest_path[next_node][1]:
+                shortest_path[next_node] = (current_node, new_weight)
+                heapq.heappush(priority_queue, (new_weight, next_node))
+
+    # Reconstruct the path from end_id to start_id
+    current_node = end_id
+    total_cost = shortest_path[end_id][1]
+    while current_node is not None:
+        path.append(current_node)
+        current_node = shortest_path[current_node][0]
+
+    path.reverse()
+
+    return path, total_cost
+
+# Example usage:
+# Assuming prm_graph is defined and has nodes and edges attributes.
+dijkstra(prm_graph, 0, 99)
