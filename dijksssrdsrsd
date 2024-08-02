@@ -1,0 +1,110 @@
+# Task 4.2 (3 marks): Djistraks
+# Example output - Path: [-1, 143, 43, 1, 14, 44, 67, 7, 9, 4, 12, 364, -2], Cost: 561.9189671797234
+def dijkstra(graph, start_id, end_id):
+    print("RUNNING DIJKSTRAS ----------------")
+    visited = []  
+    node_list = graph.nodes
+    edge_list = graph.edges
+    shortest_path = {start_id: (None, 0)}
+    
+    # Priority queue as a list
+    priority_queue = [(start_id, 0)]
+    print("GOING THROUGH PRIORITY QUEUE")
+    while priority_queue:
+        # Sort the priority queue for smallest weight first
+        priority_queue.sort(key=lambda x: x[1])
+        
+        current_node, current_weight = priority_queue.pop(0)
+        
+        # Continue if node is in visited
+        if current_node in visited:
+            continue
+        
+        # Mark the node as visited
+        visited.append(current_node)
+        
+        # Check if we have reached the goal node
+        if current_node == end_id:
+            break
+        
+        # Iterate through connected nodes
+        for next_node, weight in edge_list[current_node].items():
+            if next_node in visited:
+                continue
+            # Calculate new weight
+            new_weight = current_weight + weight
+            
+            # If the new path to next_node is shorter, update it
+            if next_node not in shortest_path or new_weight < shortest_path[next_node][1]:
+                shortest_path[next_node] = (current_node, new_weight)
+                priority_queue.append((next_node, new_weight))
+    
+    # Reconstruct the path from end_id to start_id
+    print("RECONSTRUCTING PATH -------------------------")
+    path = []
+    if end_id in shortest_path:
+        current_node = end_id
+        total_cost = shortest_path[end_id][1]
+        
+        while current_node is not None:
+            path.append(current_node)
+            current_node = shortest_path[current_node][0]
+        
+        path = path[::-1]
+    else:
+        # If there's no path to end_id, return an empty path and infinite cost
+        return([],1000000.00)
+        print(" FUCK IT FAILED ;W;W;W;W;W;")
+    print("SUCCESSFULLY FOUND PATH -----------------------")
+    return (path, total_cost)
+
+# Assuming prm_graph is defined and properly structured
+dijkstra(prm_graph, 0, 499)
+
+# Task 4.2: Djistraks continued
+
+node_list = prm_graph.nodes
+edge_list = prm_graph.edges
+# Add start node
+prm_graph.add_node(-1,start_location[0],start_location[1]) # start node
+
+cv2.circle(prm_image,(start_location[0],start_location[1]), 3, (0,255,0), -1)
+neighbors = find_closest_nodes(img_dangerzone,prm_graph,start_location[0],start_location[1],k_connections,max_connection_range)
+for a in range (0,len(neighbors)):
+    node_idx = neighbors[a][0]
+    node_dist = neighbors[a][1]
+    test_nodex = int(node_list[node_idx].x)
+    test_nodey = int(node_list[node_idx].y)
+    if (path_clear(img_dangerzone,start_location[0],start_location[1],test_nodex,test_nodey)):
+        prm_graph.add_edge(-1,node_idx,node_dist)
+        cv2.line(prm_image,(start_location[0],start_location[1]),(test_nodex,test_nodey),(0,125,0),1)
+
+# Add end node
+prm_graph.add_node(-2,goal_location[0],goal_location[1]) # end node
+cv2.circle(prm_image,(goal_location[0],goal_location[1]), 3, (0,255,0), -1)
+neighbors = find_closest_nodes(img_dangerzone,prm_graph,goal_location[0],goal_location[1],k_connections,max_connection_range)
+for a in range (0,len(neighbors)):
+    node_idx = neighbors[a][0]
+    node_dist = neighbors[a][1]
+    test_nodex = int(node_list[node_idx].x)
+    test_nodey = int(node_list[node_idx].y)
+    if (path_clear(img_dangerzone,goal_location[0],goal_location[1],test_nodex,test_nodey)):
+        prm_graph.add_edge(-2,node_idx,node_dist)
+        cv2.line(prm_image,(goal_location[0],goal_location[1]),(test_nodex,test_nodey),(0,125,0),1)
+
+# Find dijkstras
+path, cost = dijkstra(prm_graph,-1,-2)
+# Draw path
+for current in range(len(path) - 1):
+    node_id1 = path[current]
+    node_id2 = path[current+1]                  
+    x1 = int(node_list[node_id1].x)
+    y1 = int(node_list[node_id1].y)
+    x2 = int(node_list[node_id2].x)
+    y2 = int(node_list[node_id2].y)          
+    cv2.line(prm_image,(x1,y1),(x2,y2),(0,0,255),3)
+
+# Display resulting image
+print(f"Path: {path}, Cost: {cost}")
+plt.imshow(prm_image)
+plt.show()
